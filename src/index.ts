@@ -1,2 +1,4 @@
-console.log("clipboard-api: Phase 0 OK");
-console.log("Node version:", process.version);
+import { startServer } from "./server.js";
+
+const port = Number(process.env.PORT ?? 3000);
+startServer(port);
