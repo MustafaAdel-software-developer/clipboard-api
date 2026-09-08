@@ -32,7 +32,9 @@ export function createRouter(links: LinkService): Handler {
       return;
     }
     if (method === "GET" && path === "/links") {
-      await linkRoutes.list(req, res);
+      const limit = Number(url.searchParams.get("limit") ?? 0);
+      console.log(limit)
+      await linkRoutes.list(req, res, limit);
       return;
     }
     if (method === "DELETE" && path.startsWith("/links/")) {

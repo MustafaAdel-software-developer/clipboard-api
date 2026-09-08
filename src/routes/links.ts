@@ -43,8 +43,8 @@ export function createLinksRoutes(links: LinkService) {
       }
       sendJson(res, 200, { ok: true, data: result.data });
     },
-    async list(req:IncomingMessage, res: ServerResponse) {
-      const list = await links.list();
+    async list(req:IncomingMessage, res: ServerResponse, limit: number) {
+      const list = await links.list(limit);
       if(!list.ok){
         sendJson(res, 404, list);
         return;

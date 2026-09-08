@@ -43,18 +43,18 @@ export function createLinkService(store: LinkStore) {
       found.data.clicks += 1;
       return found;
     },
-    async delete(code: string):  Promise<Result<Link>> {
+    async delete(code: string): Promise<Result<Link>> {
       const found = await this.find(code);
       if (!found.ok) {
-        return {ok: false, error: "code doesn't match any"}
+        return { ok: false, error: "code doesn't match any" };
       }
       await store.delete(code);
       return found;
     },
-    async list():  Promise<Result<Link[]>>{
+    async list(limit: number): Promise<Result<Link[]>> {
       const list = await store.list();
-      return { ok: true, data: list };
-    }
+      return { ok: true, data: limit ? list.slice(0, limit) : list };
+    },
   };
 }
 
