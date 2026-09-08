@@ -50,6 +50,10 @@ export function createLinkService(store: LinkStore) {
       }
       await store.delete(code);
       return found;
+    },
+    async list():  Promise<Result<Link[]>>{
+      const list = await store.list();
+      return { ok: true, data: list };
     }
   };
 }

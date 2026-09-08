@@ -5,4 +5,5 @@ export interface LinkStore {
   getByCode(code: string): Promise<Link | null>;
   update(link: Link): Promise<void>;
   delete(code: string):Promise<void>;
+  list(): Promise<Link[]>
 }

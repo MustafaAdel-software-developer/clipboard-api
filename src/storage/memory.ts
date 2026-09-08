@@ -16,6 +16,9 @@ export function createMemoryStore() : LinkStore {
     },
     async delete(code) {
       links.delete(code);
+    },
+    async list() {
+       return [...links.values()];
     }
   };
 }

@@ -31,8 +31,8 @@ export function createRouter(links: LinkService): Handler {
       await linkRoutes.stats(req, res, code);
       return;
     }
-    if (method === "GET" && path.length > 1 && !path.slice(1).includes("/")) {
-      await linkRoutes.redirect(req, res, path.slice(1));
+    if (method === "GET" && path === "/links") {
+      await linkRoutes.list(req, res);
       return;
     }
     if (method === "DELETE" && path.startsWith("/links/")) {
@@ -42,6 +42,10 @@ export function createRouter(links: LinkService): Handler {
         return;
       }
       await linkRoutes.delete(req, res, code);
+      return;
+    }
+    if (method === "GET" && path.length > 1 && !path.slice(1).includes("/")) {
+      await linkRoutes.redirect(req, res, path.slice(1));
       return;
     }
     sendJson(res, 404, { ok: false, error: "Not found" });
