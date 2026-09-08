@@ -12,7 +12,6 @@ export function sendJson(res:ServerResponse,status:number,body:unknown):void{
 }
 
 export function readBody(req:IncomingMessage): Promise<string>{
-
     return new Promise((resolve,reject) => {
         const chunks:Buffer[] = [];
         req.on("data",(chunk:Buffer) => chunks.push(chunk));
@@ -26,4 +25,4 @@ export async function readJson(req: IncomingMessage): Promise<unknown>{
     const body = readBody(req);
     if(!body) return {};
     return JSON.stringify(body) as unknown;
-} // why return unknown ? does it our best option ? could it cause issue if the client return something exactly ?
+} 
