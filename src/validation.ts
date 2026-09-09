@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { CreateLinkInput, Result } from "./types.js";
 
 const MAX_URL_LENGTH = 2048;
@@ -16,40 +17,17 @@ function isHttpUrl(value: string): boolean {
   }
 }
 
+const CreateLinkSchema = z.object({
+  url: z.string().trim().min(1).max(2048).url(),
+});
+
 export function parseCreateLinkBody(body: unknown): Result<CreateLinkInput> {
-  if (!isRecord(body)) {
-    return { ok: false, error: "Boyd must be a JSON object." };
-  }
-
-  const { url } = body;
-
-  if (typeof url !== "string") {
-    return { ok: false, error: "field url must be string." };
-  }
-
-  const trimmed = url.trim();
-
-  if (trimmed.length === 0) {
-    return { ok: false, error: "field url must not be empty." };
-  }
-
-  if (trimmed.length > MAX_URL_LENGTH) {
+  const result = CreateLinkSchema.safeParse(body);
+  if (!result.success) {
     return {
       ok: false,
-      error: `url size must be at most ${MAX_URL_LENGTH} characters.`,
+      error: result.error.issues[0]?.message ?? "Invalid Body",
     };
   }
-
-  if (!isHttpUrl(trimmed)) {
-    return { ok: false, error: "url field must be http(s) URL." };
-  }
-  return { ok: true, data: { url: trimmed } };
+  return { ok: true, data: result.data };
 }
-
-export function parseCode(raw: string): Result<string> {
-  if (!CODE_PATTERN.test(raw)) {
-    return { ok: false, error: "Invalid code." };
-  }
-  return { ok: true, data: raw };
-}
-
