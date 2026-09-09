@@ -3,6 +3,7 @@ import { LinkService } from "./services/links.js";
 import { createLinksRoutes } from "./routes/links.js";
 import { sendJson } from "./http.js";
 import { healthRoute } from "./routes/health.js";
+import { parseCode } from "./validation.js";
 
 type Handler = (req: IncomingMessage, res: ServerResponse) => Promise<void>;
 
@@ -23,12 +24,12 @@ export function createRouter(links: LinkService): Handler {
       return;
     }
     if (method === "GET" && path.startsWith("/links/")) {
-      const code = path.slice("/links/".length);
-      if (!code || code.includes("/")) {
+      const parsed = parseCode(path.slice("/links/".length));
+      if (!parsed.ok) {
         sendJson(res, 404, { ok: false, error: "Not found" });
         return;
       }
-      await linkRoutes.stats(req, res, code);
+      await linkRoutes.stats(req, res, parsed.data);
       return;
     }
     if (method === "GET" && path === "/links") {
@@ -38,12 +39,12 @@ export function createRouter(links: LinkService): Handler {
       return;
     }
     if (method === "DELETE" && path.startsWith("/links/")) {
-      const code = path.slice("/links/".length);
-      if (!code || code.includes("/")) {
+      const parsed = parseCode(path.slice("/links/".length));
+      if (!parsed.ok) {
         sendJson(res, 404, { ok: false, error: "Not found" });
         return;
       }
-      await linkRoutes.delete(req, res, code);
+      await linkRoutes.delete(req, res, parsed.data);
       return;
     }
     if (method === "GET" && path.length > 1 && !path.slice(1).includes("/")) {

@@ -14,13 +14,8 @@ function isValidURL(url: string): boolean {
 export function createLinkService(store: LinkStore) {
   return {
     async create(input: CreateLinkInput): Promise<Result<Link>> {
-      if (!isValidURL(input.url)) return { ok: false, error: "url invalid!" };
-      if (input.url.length > 2048) {
-        return { ok: false, error: "URL too long" };
-      }
-      const code = generateCode();
       const link: Link = {
-        code,
+        code: generateCode(),
         url: input.url,
         createdAt: new Date().toISOString(),
         clicks: 0,

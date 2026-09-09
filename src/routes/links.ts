@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from "node:http";
 import { LinkService } from "../services/links.js";
-import { readJson, sendJson } from "../http.js";
+import { PayloadTooLargeError, readJson, sendJson } from "../http.js";
+import { parseCreateLinkBody } from "../validation.js";
 
 export function createLinksRoutes(links: LinkService) {
   return {
@@ -8,25 +9,21 @@ export function createLinksRoutes(links: LinkService) {
       let body: unknown;
       try {
         body = await readJson(req);
-      } catch {
+      } catch (err) {
+        if (err instanceof PayloadTooLargeError) {
+          sendJson(res, 413, { ok: false, error: err.message });
+          return;
+        }
         sendJson(res, 400, { ok: false, error: "Invalid JSON" });
         return;
       }
-
-      const urlValue =
-        typeof body === "object" &&
-        body !== null &&
-        "url" in body &&
-        typeof (body as { url: unknown }).url === "string"
-          ? (body as { url: string }).url
-          : null;
-
-      if (!urlValue) {
-        sendJson(res, 400, { ok: false, error: "Missing url string" });
+      const parsed = parseCreateLinkBody(body);
+      if (!parsed.ok) {
+        sendJson(res, 400, parsed);
         return;
       }
 
-      const result = await links.create({ url: urlValue });
+      const result = await links.create(parsed.data);
       if (!result.ok) {
         sendJson(res, 400, result);
         return;
@@ -36,16 +33,16 @@ export function createLinksRoutes(links: LinkService) {
       return;
     },
     async delete(req: IncomingMessage, res: ServerResponse, code: string) {
-       const result = await links.delete(code);
+      const result = await links.delete(code);
       if (!result.ok) {
         sendJson(res, 404, result);
         return;
       }
       sendJson(res, 200, { ok: true, data: result.data });
     },
-    async list(req:IncomingMessage, res: ServerResponse, limit: number) {
+    async list(req: IncomingMessage, res: ServerResponse, limit: number) {
       const list = await links.list(limit);
-      if(!list.ok){
+      if (!list.ok) {
         sendJson(res, 404, list);
         return;
       }
