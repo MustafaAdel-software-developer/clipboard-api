@@ -12,3 +12,6 @@ export type CreateLinkInput = {
 export type Result<D, E = string> = 
     | {ok:true;data:D} 
     | {ok:false;error:E}
+
+
+export type ListQuery = {limit:number};

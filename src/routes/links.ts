@@ -2,6 +2,7 @@ import { IncomingMessage, ServerResponse } from "node:http";
 import { LinkService } from "../services/links.js";
 import { PayloadTooLargeError, readJson, sendJson } from "../http.js";
 import { parseCreateLinkBody } from "../validation.js";
+import { ListQuery } from "../types.js";
 
 export function createLinksRoutes(links: LinkService) {
   return {
@@ -40,8 +41,8 @@ export function createLinksRoutes(links: LinkService) {
       }
       sendJson(res, 200, { ok: true, data: result.data });
     },
-    async list(req: IncomingMessage, res: ServerResponse, limit: number) {
-      const list = await links.list(limit);
+    async list(req: IncomingMessage, res: ServerResponse, parsedLimit: ListQuery) {
+      const list = await links.list(parsedLimit.limit);
       if (!list.ok) {
         sendJson(res, 404, list);
         return;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CreateLinkInput, Result } from "./types.js";
+import { CreateLinkInput, ListQuery, Result } from "./types.js";
 
 const MAX_URL_LENGTH = 2048;
 const CODE_PATTERN = /^[A-Za-z0-9_-]{3,32}$/;
@@ -30,4 +30,21 @@ export function parseCreateLinkBody(body: unknown): Result<CreateLinkInput> {
     };
   }
   return { ok: true, data: result.data };
+}
+export function parseCode(raw: string): Result<string> {
+  if (!CODE_PATTERN.test(raw)) {
+    return { ok: false, error: "Invalid code." };
+  }
+  return { ok: true, data: raw };
+}
+
+export function parseListQuery(params: URLSearchParams): Result<ListQuery> {
+  const raw = params.get("limit");
+  if (!raw) return { ok: true, data: { limit: 10 } };
+
+  const n = Number(raw);
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1 || n > 100)
+    return { ok: false, error: "limit should be in range 1 to 100" };
+
+  return { ok: true, data: { limit: n } };
 }
