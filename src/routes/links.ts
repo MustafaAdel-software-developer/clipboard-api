@@ -26,7 +26,7 @@ export function createLinksRoutes(links: LinkService) {
 
       const result = await links.create(parsed.data);
       if (!result.ok) {
-        sendJson(res, 400, result);
+        sendJson(res, 409, result);
         return;
       }
 
@@ -41,7 +41,11 @@ export function createLinksRoutes(links: LinkService) {
       }
       sendJson(res, 200, { ok: true, data: result.data });
     },
-    async list(req: IncomingMessage, res: ServerResponse, parsedLimit: ListQuery) {
+    async list(
+      req: IncomingMessage,
+      res: ServerResponse,
+      parsedLimit: ListQuery,
+    ) {
       const list = await links.list(parsedLimit.limit);
       if (!list.ok) {
         sendJson(res, 404, list);

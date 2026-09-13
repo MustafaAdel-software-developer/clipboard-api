@@ -6,21 +6,21 @@ function generateCode(size = 6): string {
   return randomBytes(size).toString("base64url").slice(0, size);
 }
 
-function isValidURL(url: string): boolean {
-  const u = new URL(url);
-  return u.protocol === "http:" || u.protocol === "https:";
-}
-
 export function createLinkService(store: LinkStore) {
   return {
     async create(input: CreateLinkInput): Promise<Result<Link>> {
+      const code = input.code ?? generateCode();
+      if (input.code) {
+        const exist = await store.getByCode(input.code);
+        if (exist) return { ok: false, error: "code is taken" };
+      }
       const link: Link = {
-        code: generateCode(),
+        code,
         url: input.url,
         createdAt: new Date().toISOString(),
         clicks: 0,
       };
-      store.save(link);
+      await store.save(link);
       return { ok: true, data: link };
     },
 

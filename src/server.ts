@@ -7,9 +7,10 @@ import { readBody, readJson, sendJson } from "./http.js";
 import { createRouter } from "./router.js";
 import { createLinkService } from "./services/links.js";
 import { createMemoryStore } from "./storage/memory.js";
+import { createFileStore } from "./storage/file.js";
 
-export function startServer(port: number) {
-  const store = createMemoryStore();
+export async function startServer(port: number) {
+  const store = process.env.STORE === 'file' ? await createFileStore(process.env.DATA_PATH ?? "data/links.json") : createMemoryStore();
   const links = createLinkService(store);
   const router = createRouter(links);
   const server = createServer((req, res) => {

@@ -44,7 +44,7 @@ export function createRouter(links: LinkService): Handler {
     if (method === "DELETE" && path.startsWith("/links/")) {
       const parsed = parseCode(path.slice("/links/".length));
       if (!parsed.ok) {
-        sendJson(res, 404, { ok: false, error: "Not found" });
+        sendJson(res, 400, { ok: false, error: "Not found" });
         return;
       }
       await linkRoutes.delete(req, res, parsed.data);

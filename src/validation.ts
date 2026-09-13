@@ -1,24 +1,20 @@
 import { z } from "zod";
 import { CreateLinkInput, ListQuery, Result } from "./types.js";
 
-const MAX_URL_LENGTH = 2048;
 const CODE_PATTERN = /^[A-Za-z0-9_-]{3,32}$/;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isHttpUrl(value: string): boolean {
-  try {
-    const parsed = new URL(value);
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
 
 const CreateLinkSchema = z.object({
   url: z.string().trim().min(1).max(2048).url(),
+  code: z
+    .string()
+    .trim()
+    .min(3, "Too short")
+    .max(32, "Too long")
+    .regex(
+      CODE_PATTERN,
+      "Only letters, numbers, underscores, and hyphens allowed",
+    )
+    .optional(),
 });
 
 export function parseCreateLinkBody(body: unknown): Result<CreateLinkInput> {

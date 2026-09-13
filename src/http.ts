@@ -33,7 +33,7 @@ export function readBody(req: IncomingMessage): Promise<string> {
       }
       chunks.push(chunk);
     });
-    req.on("end", () => Buffer.concat(chunks).toString("utf-8"));
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
     req.on("error", reject);
   });
 }
