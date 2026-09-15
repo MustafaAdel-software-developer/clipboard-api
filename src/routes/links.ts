@@ -1,8 +1,9 @@
 import { IncomingMessage, ServerResponse } from "node:http";
 import { LinkService } from "../services/links.js";
-import { PayloadTooLargeError, readJson, sendJson } from "../http.js";
+import {  readJson, sendJson } from "../http.js";
 import { parseCreateLinkBody } from "../validation.js";
 import { ListQuery } from "../types.js";
+import { BadRequestError, NotFoundError, PayloadTooLargeError } from "../errors.js";
 
 export function createLinksRoutes(links: LinkService) {
   return {
@@ -11,12 +12,8 @@ export function createLinksRoutes(links: LinkService) {
       try {
         body = await readJson(req);
       } catch (err) {
-        if (err instanceof PayloadTooLargeError) {
-          sendJson(res, 413, { ok: false, error: err.message });
-          return;
-        }
-        sendJson(res, 400, { ok: false, error: "Invalid JSON" });
-        return;
+        if (err instanceof PayloadTooLargeError) throw err;
+        throw new BadRequestError("Invalid JSON");
       }
       const parsed = parseCreateLinkBody(body);
       if (!parsed.ok) {
@@ -57,8 +54,7 @@ export function createLinksRoutes(links: LinkService) {
     async stats(_req: IncomingMessage, res: ServerResponse, code: string) {
       const result = await links.find(code);
       if (!result.ok) {
-        sendJson(res, 404, result);
-        return;
+        throw new NotFoundError(result.error);
       }
       sendJson(res, 200, { ok: true, data: result.data });
     },

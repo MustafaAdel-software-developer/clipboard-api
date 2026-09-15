@@ -1,4 +1,5 @@
 import {IncomingMessage , ServerResponse} from 'node:http';
+import { PayloadTooLargeError } from './errors.js';
 
 const MAX_BODY_BYTES = 1_000_000; //1MB
 
@@ -12,12 +13,7 @@ export function sendJson(res:ServerResponse,status:number,body:unknown):void{
     res.end(json);
 }
 
-export class PayloadTooLargeError extends Error {
-    constructor(){
-        super("Payload too large.");
-        this.name = "PayloadTooLargeError";
-    }
-}
+
 
 export function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
