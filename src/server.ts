@@ -8,15 +8,19 @@ import { createRouter } from "./router.js";
 import { createLinkService } from "./services/links.js";
 import { createMemoryStore } from "./storage/memory.js";
 import { createFileStore } from "./storage/file.js";
+import { AppError } from "./errors.js";
 
 export async function startServer(port: number) {
-  const store = process.env.STORE === 'file' ? await createFileStore(process.env.DATA_PATH ?? "data/links.json") : createMemoryStore();
+  const store =
+    process.env.STORE === "file"
+      ? await createFileStore(process.env.DATA_PATH ?? "data/links.json")
+      : createMemoryStore();
   const links = createLinkService(store);
   const router = createRouter(links);
   const server = createServer((req, res) => {
     router(req, res).catch((err: unknown) => {
-      console.error(err);
-      sendJson(res, 500, { ok: false, error: "Internal error" });
+      const {status , body } = toErrorResponse(err);
+      sendJson(res, status, body);
     });
   });
 
@@ -24,4 +28,15 @@ export async function startServer(port: number) {
     console.log(`listening on http://localhost:${port}`);
   });
   return server;
+
+  function toErrorResponse(err: unknown): { status: number; body: object } {
+    if (err instanceof AppError) {
+      return {
+        status: err.status,
+        body: { ok: false, error: err.message, code: err.code },
+      };
+    }
+    console.error(err);
+    return { status: 500, body: { ok: false, error: "Internal error" } };
+  }
 }
