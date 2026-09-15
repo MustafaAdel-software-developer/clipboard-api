@@ -1,7 +1,5 @@
 import {
   createServer,
-  type IncomingMessage,
-  type ServerResponse,
 } from "node:http";
 import { readBody, readJson, sendJson } from "./http.js";
 import { createRouter } from "./router.js";
@@ -9,6 +7,7 @@ import { createLinkService } from "./services/links.js";
 import { createMemoryStore } from "./storage/memory.js";
 import { createFileStore } from "./storage/file.js";
 import { AppError } from "./errors.js";
+import { getRequestd } from "./middleware/requestId.js";
 
 export async function startServer(port: number) {
   const store =
@@ -18,8 +17,11 @@ export async function startServer(port: number) {
   const links = createLinkService(store);
   const router = createRouter(links);
   const server = createServer((req, res) => {
+    const requestId = getRequestd(req);
+    res.setHeader("x-request-id", requestId);
+
     router(req, res).catch((err: unknown) => {
-      const {status , body } = toErrorResponse(err);
+      const { status, body } = toErrorResponse(err);
       sendJson(res, status, body);
     });
   });
@@ -33,7 +35,7 @@ export async function startServer(port: number) {
     if (err instanceof AppError) {
       return {
         status: err.status,
-        body: { ok: false, error: err.message, code: err.code },
+        body: { ok: false, error: err.message, code: err.code},
       };
     }
     console.error(err);
