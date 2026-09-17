@@ -51,6 +51,15 @@ export async function createFileStore(filePath: string): Promise<LinkStore> {
     }
   }
 
+  let chain = Promise.resolve();
+  function withLock<T>(fn: () => Promise<T>): Promise<T> {
+    const run = chain.then(fn, fn);
+    chain = run.then(
+      () => {},
+      () => {},
+    );
+    return run;
+  }
 
   return {
     async getByCode(code) {
@@ -60,16 +69,22 @@ export async function createFileStore(filePath: string): Promise<LinkStore> {
       return [...links.values()];
     },
     async save(link) {
-      links.set(link.code, link);
-      await flush();
+      return withLock(async () => {
+        links.set(link.code, link);
+        await flush();
+      });
     },
     async update(link) {
-      links.set(link.code, link);
-      await flush();
+      return withLock(async () => {
+        links.set(link.code, link);
+        await flush();
+      });
     },
     async delete(code) {
-      links.delete(code);
-      await flush();
+      return withLock(async () => {
+        links.delete(code);
+        await flush();
+      });
     },
   };
 }
