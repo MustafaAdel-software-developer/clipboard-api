@@ -1,20 +1,20 @@
-import {IncomingMessage , ServerResponse} from 'node:http';
-import { PayloadTooLargeError } from './errors.js';
+import { IncomingMessage, ServerResponse } from "node:http";
+import { PayloadTooLargeError } from "./errors.js";
 
 const MAX_BODY_BYTES = 1_000_000; //1MB
 
-
-export function sendJson(res:ServerResponse,status:number,body:unknown):void{
-    const json = JSON.stringify(body);
-    res.writeHead(status,{
-        "content-type":"application/json; charset=utf-8",
-        "content-length": Buffer.byteLength(json)
-    });
-    res.end(json);
+export function sendJson(
+  res: ServerResponse,
+  status: number,
+  body: unknown,
+): void {
+  const json = JSON.stringify(body);
+  res.writeHead(status, {
+    "content-type": "application/json; charset=utf-8",
+    "content-length": Buffer.byteLength(json),
+  });
+  res.end(json);
 }
-
-
-
 export function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -34,8 +34,8 @@ export function readBody(req: IncomingMessage): Promise<string> {
   });
 }
 
-export async function readJson(req: IncomingMessage): Promise<unknown>{
-    const body = await readBody(req);
-    if(!body) return {};
-    return JSON.stringify(body) as unknown;
-} 
+export async function readJson(req: IncomingMessage): Promise<unknown> {
+  const body = await readBody(req);
+  if (!body) return {};
+  return JSON.stringify(body) as unknown;
+}
