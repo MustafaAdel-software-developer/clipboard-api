@@ -1,6 +1,6 @@
 import { Link } from "../types.js";
 
-function isLink(value: unknown): value is Link {
+export function isLink(value: unknown): value is Link {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }
