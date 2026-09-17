@@ -35,8 +35,7 @@ export function readBody(req: IncomingMessage): Promise<string> {
 }
 
 export async function readJson(req: IncomingMessage): Promise<unknown>{
-    
-    const body = readBody(req);
+    const body = await readBody(req);
     if(!body) return {};
     return JSON.stringify(body) as unknown;
 } 
