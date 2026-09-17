@@ -35,7 +35,7 @@ export function createLinkService(store: LinkStore) {
       const found = await this.find(code);
       if (!found.ok) return found;
 
-      const updated = { ...found.data, clicks: (found.data.clicks += 1) };
+      const updated = { ...found.data, clicks: found.data.clicks + 1 };
       await store.update(updated);
       return { ok: true, data: updated };
     },
