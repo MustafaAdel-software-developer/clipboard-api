@@ -20,10 +20,20 @@ export async function startServer(port: number) {
     const requestId = getRequestd(req);
     res.setHeader("x-request-id", requestId);
 
-    router(req, res).catch((err: unknown) => {
-      const { status, body } = toErrorResponse(err);
-      sendJson(res, status, body);
-    });
+    const start = Date.now();
+
+    router(req, res)
+      .catch((err: unknown) => {
+        const { status, body } = toErrorResponse(err);
+        sendJson(res, status, body);
+      })
+      .finally(() => {
+        const ms = Date.now() - start;
+        const method = req.method ?? "?";
+        const path = req.url ?? "?";
+        const status = res.statusCode;
+        console.log(`${method} ${path} ${status} ${ms}ms rid=${requestId}`);
+      });
   });
 
   server.listen(port, () => {
