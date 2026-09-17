@@ -2,7 +2,7 @@ import { dirname } from "node:path";
 import { Link } from "../types.js";
 import { isLinkArray } from "./guards.js";
 import { LinkStore } from "./types.js";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
 
 export async function createFileStore(filePath: string): Promise<LinkStore> {
   const links = new Map<string, Link>();
@@ -22,7 +22,7 @@ export async function createFileStore(filePath: string): Promise<LinkStore> {
       }
       throw err;
     }
-     let raw: unknown 
+    let raw: unknown;
     try {
       raw = JSON.parse(text);
     } catch (err) {
@@ -40,10 +40,17 @@ export async function createFileStore(filePath: string): Promise<LinkStore> {
   await ensureLoaded();
 
   async function flush(): Promise<void> {
-    await mkdir(dirname(filePath), { recursive: true });
-    const text = JSON.stringify([...links.values()], null, 2);
-    await writeFile(filePath, text, "utf8");
+    try {
+      const fileTempPath = `${filePath}.tmp`;
+      await mkdir(dirname(fileTempPath), { recursive: true });
+      const text = JSON.stringify([...links.values()], null, 2);
+      await writeFile(fileTempPath, text, "utf8");
+      await rename(fileTempPath, filePath);
+    } catch (err) {
+      throw err;
+    }
   }
+
 
   return {
     async getByCode(code) {
