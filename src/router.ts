@@ -20,6 +20,21 @@ export function createRouter(links: LinkService): Handler {
       return;
     }
     if (method === "POST" && path === "/links") {
+      const contentType = req.headers["content-type"] ?? "";
+      const valueOfContentType: string = Array.isArray(contentType)
+        ? contentType[0]
+        : contentType;
+      const isJson = valueOfContentType
+        .toLowerCase()
+        .startsWith("application/json");
+
+      if (!isJson) {
+        sendJson(res, 415, {
+          ok: false,
+          error: " content type must be plain text",
+        });
+        return;
+      }
       await linkRoutes.create(req, res);
       return;
     }
@@ -35,7 +50,7 @@ export function createRouter(links: LinkService): Handler {
     if (method === "GET" && path === "/links") {
       const parsed = parseListQuery(url.searchParams);
       if (!parsed.ok) {
-        sendJson(res, 400,  parsed);
+        sendJson(res, 400, parsed);
         return;
       }
       await linkRoutes.list(req, res, parsed.data);
