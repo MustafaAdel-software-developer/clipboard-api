@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXIST links (
 export async function createSqliteStore(dbPath: string): Promise<LinkStore> {
     await mkdir(dirname(dbPath), { recursive: true });
     const db = new DatabaseSync(dbPath);
-    db.exec(`CREATE TABLE IF NOT EXIST links (
+    db.exec(`CREATE TABLE IF NOT EXISTS links (
         code TEXT PRIMARY KEY,
         url TEXT NOT NULL,
         createdAt TEXT NOT NULL,
