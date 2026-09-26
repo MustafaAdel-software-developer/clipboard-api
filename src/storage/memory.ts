@@ -11,6 +11,13 @@ export function createMemoryStore() : LinkStore {
     async getByCode(code) {
       return links.get(code) ?? null;
     },
+    async incrementClicks(code) {
+      const link = links.get(code);
+      if (!link) return null;
+      const updated = { ...link, clicks: link.clicks + 1 };
+      links.set(code, updated);
+      return updated;
+    },
     async update(link) {
       links.set(link.code, link);
     },
@@ -18,7 +25,7 @@ export function createMemoryStore() : LinkStore {
       links.delete(code);
     },
     async list() {
-       return [...links.values()];
-    }
+      return [...links.values()];
+    },
   };
 }

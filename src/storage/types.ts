@@ -6,4 +6,5 @@ export interface LinkStore {
   update(link: Link): Promise<void>;
   delete(code: string):Promise<void>;
   list(): Promise<Link[]>
+  incrementClicks(code: string): Promise<Link | null>
 }

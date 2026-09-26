@@ -62,6 +62,16 @@ export async function createFileStore(filePath: string): Promise<LinkStore> {
   }
 
   return {
+    async incrementClicks(code: string): Promise<Link | null>{
+      return withLock(async () => {
+        const link = links.get(code);
+        if(!link) return null;
+        const updated = {...link,clicks: link.clicks + 1};
+        links.set(link.code,updated);
+        await flush();
+        return updated;
+      });
+    },
     async getByCode(code) {
       return links.get(code) ?? null;
     },

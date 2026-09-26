@@ -24,27 +24,34 @@ export async function createSqliteStore(dbPath: string): Promise<LinkStore> {
         clicks INTEGER NOT NULL DEFAULT 0);`);
 
     const insert = db.prepare(`INSERT INTO links (code,url,createdAt,clicks) VALUES(?,?,?,?)`) 
-    const update = db.prepare(`UPDATE links SET code = ?, url = ?, createdAt = ?, clicks = ?`)
+    const update = db.prepare(`UPDATE links SET url = ?, createdAt = ?, clicks = ? WHERE code = ?`)
+    const inc = db.prepare(`UPDATE links SET clicks = clicks + 1 WHERE code = ?`,);
     const select = db.prepare(`SELECT * FROM links WHERE code = ?`)
     const remove = db.prepare(`DELETE FROM links WHERE code = ?`)
     const selectAll = db.prepare(`SELECT * FROM links`);
 
     return {
-        async save(link){
-            insert.run(link.code,link.url,link.createdAt,link.clicks);
-        },
-        async update(link){
-            update.run(link.code,link.url,link.createdAt,link.clicks);
-        },
-        async getByCode(code){
-            const row = select.get(code) as Link | undefined;
-            return row ?? null;
-        },
-        async delete(code) {
-            remove.run(code);
-        },
-        async list(){
-            return selectAll.all() as Link[];
-        }
-    }
+      async save(link) {
+        insert.run(link.code, link.url, link.createdAt, link.clicks);
+      },
+      async incrementClicks(code) {
+        const result = inc.run(code);
+        if (result.changes === 0) return null; // no row
+        const row = select.get(code) as Link | undefined;
+        return row ?? null;
+      },
+      async update(link) {
+        update.run(link.url, link.createdAt, link.clicks,link.code);
+      },
+      async getByCode(code) {
+        const row = select.get(code) as Link | undefined;
+        return row ?? null;
+      },
+      async delete(code) {
+        remove.run(code);
+      },
+      async list() {
+        return selectAll.all() as Link[];
+      },
+    };
 }
